@@ -16,7 +16,7 @@
 <mt-button type="primary" class="mint-button--large" v-on:click="login">登   录</mt-button>
 </div>
 <div class="login-c">
-<mt-button type="primary" class="mint-button--large" v-on:click="huiyuan">login in</mt-button></div>
+<mt-button type="primary" class="mint-button--large" v-on:click="huiyuan">会   员</mt-button></div>
     <!-- <router-link to="/vuex">ShoppingCart Example</router-link> -->
   </div>
 </template>
@@ -42,7 +42,7 @@ export default Vue.extend({
       this.$router.push({ path: '/home' })
     },
     huiyuan (){
-      this.$router.push({ path: '/denglu' })
+      this.$router.push({ path: '/member' })
     },
     hello () {
       console.log('Hello world')
