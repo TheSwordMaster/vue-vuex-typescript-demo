@@ -1,103 +1,166 @@
 <template>
   <div>
-    
-      <mt-header title="多个按钮" class="top-fixed">
-  <router-link to="/" slot="left">
-    <mt-button icon="back">返回</mt-button>
-  </router-link>
-  <mt-button icon="more" slot="right" @click="actionSheet"></mt-button>
-</mt-header>
- <div class="invipform">
-
-<mt-field label="姓名" placeholder="输入姓名" v-model="username"></mt-field>
-
-<mt-field label="手机号码" placeholder="输入手机号码" type="tel" v-model="phone"></mt-field>
-
-<mt-field label="会员级别" placeholder="输入会员" type="number" v-model="number"></mt-field>
-<mt-field label="出生年月" placeholder="选择年月" type="text" @click="birthday"></mt-field>
-<mt-field label="备注" placeholder="输入备注" type="textarea" rows="4" v-model="introduction"></mt-field>
-
-    <product-list></product-list>
-    
-   
-    <cart></cart>
-</div>
-
-<tabbar-nav></tabbar-nav>
-
-
-    <mt-actionsheet
-  :actions="sheetdata"
-  v-model="sheetVisible">
-</mt-actionsheet>
-
-<mt-datetime-picker
-  v-model="pickerVisible"
-  type="date"
-  year-format="{value} 年"
-  month-format="{value} 月"
-  date-format="{value} 日">
-</mt-datetime-picker>
-
+    <el-table
+      :data="tableData"
+      border
+      style="width: 100%"
+      @selection-change="selected">
+      <el-table-column
+        type="selection"
+        width="50">
+      </el-table-column>
+      <el-table-column
+        label="商品名称"
+        width="680">
+        <template scope="scope">
+          <div style="margin-left: 50px">
+            <img :src="scope.row.goods.img" style="height: 50px;width: 50px">
+            <span style="font-size: 18px;padding-left: 200px;">{{scope.row.goods.descript}}</span>
+          </div>
+        </template>
+      </el-table-column>
+      <el-table-column
+        label="单价"
+        width="150"
+        prop="price">
+      </el-table-column>
+      <el-table-column
+        label="数量"
+        width="200">
+        <template scope="scope">
+          <div>
+            <el-input
+              v-model="scope.row.number" @change="handleInput(scope.row)">
+              <el-button slot="prepend" @click="del(scope.row)"><i class="el-icon-minus"></i></el-button>
+              <el-button slot="append" @click="add(scope.row)"><i class="el-icon-plus"></i></el-button>
+            </el-input>
+          </div>
+        </template>
+      </el-table-column>
+      <el-table-column
+        label="小计"
+        width="150"
+        prop="goodTotal">
+      </el-table-column>
+      <el-table-column label="操作">
+        <template scope="scope">
+          <el-button type="danger" @click="handleDelete(scope.$index, scope.row)">
+          删除<i class="el-icon-delete2 el-icon--right"></i>
+          </el-button> 
+        </template>
+      </el-table-column>
+    </el-table>
+    <br>
+    <el-button type="info" style="float: right">{{"商品总额：" + moneyTotal}}</el-button>
   </div>
 </template>
 
 <script lang="ts">
-import Vue from "vue";
-import ProductList from "./ProductList.vue";
-import Cart from "./Cart.vue";
-import TabbarNav from "./TabbarNav.vue";
+import Vue from 'vue'
+
 export default Vue.extend({
-  components: { ProductList, Cart, TabbarNav },
-  data() {
-    return {
-      // action sheet 选项内容
-      sheetdata: [
-        {
-          name: "拍照",
-          method: this.getCamera // 调用methods中的函数
-        },
-        {
-          name: "从相册中选择",
-          method: this.getLibrary // 调用methods中的函数
+  name: 'HelloWorld',
+   data() {
+      return {
+        tableData: [{
+          goods:{
+            img:'http://i1.mifile.cn/a1/pms_1474859997.10825620!80x80.jpg',
+            descript:'小米手环2',
+          },
+          price:149,
+          number:1,
+          goodTotal:149,
+        },{
+          goods:{
+            img:'http://i1.mifile.cn/a1/pms_1482321199.12589253!80x80.jpg',
+            descript:'小米活塞耳机 清新版 黑色',
+          },
+          price:29,
+          number:1,
+          goodTotal:29, 
+        },{
+          goods:{
+            img:'http://i1.mifile.cn/a1/pms_1468288696.74437986!80x80.jpg',
+            descript:'米家LED随身灯 增强版 蓝色',
+          },
+          price:14.9,
+          number:1,
+          goodTotal:14.9, 
+        },{
+          goods:{
+            img:'http://i1.mifile.cn/a1/pms_1476688193.46995320.jpg?width=140&height=140',
+            descript:'10000mAh小米移动电源2 银色',
+          },
+          price:79,
+          number:1,
+          goodTotal:79, 
+        }],
+        moneyTotal:0,
+        multipleSelection:[],
+      }
+	},
+	
+	methods: {
+      handleDelete(index:any, row:any) {
+        this.$confirm('确定删除该商品？', '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }).then(() => {
+          //删除数组中指定的元素
+          this.tableData.splice(index,1);
+          this.$message({
+            type: 'success',
+            message: '删除成功!'
+          });
+        }).catch(() => {
+          this.$message({
+            type: 'info',
+            message: '已取消删除'
+          });          
+        });
+      },
+      handleInput:function(value:any){
+        if(null==value.number || value.number==""){
+          value.number=1;
         }
-      ],
-      // action sheet 默认不显示，为false。操作sheetVisible可以控制显示与隐藏
-      sheetVisible: false,
-      pickerVisible:false
-
-    };
-  },
-  methods: {
-    actionSheet: function() {
-      // 打开action sheet
-      this.sheetVisible = true;
-    },
-    birthday:function(){
-      this.pickerVisible=true;
-    },
-    getCamera: function() {
-      console.log("打开照相机");
-    },
-    getLibrary: function() {
-      console.log("打开相册");
-    }
+        value.goodTotal=(value.number * value.price).toFixed(2);//保留两位小数
+        //增加商品数量也需要重新计算商品总价
+        this.selected(this.multipleSelection);
+      },
+      add:function(addGood:any){
+        //输入框输入值变化时会变为字符串格式返回到js
+        //此处要用v-model，实现双向数据绑定
+        if(typeof addGood.number=='string'){
+          addGood.number=parseInt(addGood.number);
+        };
+        addGood.number+=1;
+        addGood.goodTotal=(addGood.number * addGood.price).toFixed(2);//保留两位小数
+        this.selected(this.multipleSelection);
+      },
+      del:function(delGood:any){
+        if(typeof delGood.number=='string'){
+          delGood.number=parseInt(delGood.number);
+        };
+        if(delGood.number>1){
+          delGood.number-=1;
+        } 
+        delGood.goodTotal=(delGood.number * delGood.price).toFixed(2);//保留两位小数
+        this.selected(this.multipleSelection);
+      },
+      //返回的参数为选中行对应的对象
+      selected:function(selection:any){
+        this.multipleSelection=selection;
+        this.moneyTotal=0;
+        //此处不支持forEach循环，只能用原始方法了
+        for(var i=0;i<selection.length;i++){
+          //判断返回的值是否是字符串
+          if(typeof selection[i].goodTotal=='string'){
+            selection[i].goodTotal=parseInt(selection[i].goodTotal);
+          };
+          this.moneyTotal+=selection[i].goodTotal;
+        }
+      }
   }
-});
+})
 </script>
-<style scoped>
-.invipform {
-  padding: 2.3rem 0 5em 0;
-  overflow: auto;
-  height: 100%;
-}
-
-.top-fixed {
-    right: 0;
-    top: 0;
-    left: 0;
-    position: fixed;
-    z-index: 1;
-}
-
-</style>

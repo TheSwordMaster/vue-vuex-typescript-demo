@@ -7,7 +7,10 @@ import './assets/style.css'
 import App from './App.vue'
 import router from './router'
 import store from './store'
+import ElementUI from 'element-ui'
+import 'element-ui/lib/theme-chalk/index.css'
 
+Vue.use(ElementUI)
 import { currency } from './currency'
 
 import { Header, Cell, Checklist, PaletteButton, Button, Swipe, SwipeItem,Field,Actionsheet,Tabbar, TabItem,DatetimePicker,Picker } from 'mint-ui'
